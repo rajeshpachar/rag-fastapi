@@ -1,11 +1,10 @@
 from sqlalchemy.orm import Session
-from app.db import FileChunk
 import nltk
 from nltk.tokenize import sent_tokenize
 from openai import OpenAI
 from dotenv import load_dotenv
 
-load_dotenv()
+from app.models import FileChunk
 
 client = OpenAI()
 
@@ -26,7 +25,8 @@ class TextProcessor:
         chunks = [' '.join(sentences[i:i + self.chunk_size])
                   for i in range(0, len(sentences), self.chunk_size)]
 
-        for chunk in chunks:
+        # Embed chunks
+        for idx, chunk in chunks:
             # Create embeddings
             response = client.embeddings.create(
                 input=chunk,
@@ -38,6 +38,8 @@ class TextProcessor:
             # Store chunk and embedding in database
             file_chunk = FileChunk(file_id=self.file_id,
                                    chunk_text=chunk,
+                                   chunk_index=idx,
+                                   chunk_length=len(chunk),
                                    embedding_vector=embeddings)
             self.db.add(file_chunk)
 

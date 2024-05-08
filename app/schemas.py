@@ -3,17 +3,21 @@ from typing import List, Optional
 from pydantic import BaseModel
 import time
 
-# class BaseEntityModel(BaseModel):
-    # id: int
-    # created_at: time
-    # updated_at: time
-    # created_by: str
-    # updated_by: str
-    # account_id: str
-    # account_name: str
 
-    # class Config:
-    #     orm_mode = True
+class QuestionModel(BaseModel):
+    question: str
+
+
+# class PageContent(BaseModel):
+#     page_num: int
+#     content: str
+
+# class DocumentContent(BaseModel):
+#     pages: List[PageContent] = []
+#     document_length: int
+
+
+###################################
 
 class ItemBase(BaseModel):
     name: str

@@ -18,10 +18,11 @@ class BaseEntity(Base):
 class File(BaseEntity):
     __tablename__ = 'files'
     file_name = Column(String(255))
-    file_content = Column(Text)
     bucket_name = Column(String(255))
     bucket_key = Column(Text)
-    
+    file_length = Column(BigInteger)
+    file_type = Column(String(16))
+    file_chunks = relationship("FileChunk", back_populates="file")
 
 
 class FileChunk(BaseEntity):
@@ -29,7 +30,10 @@ class FileChunk(BaseEntity):
     file_id = Column(Integer,  ForeignKey('files.id'))
     chunk_text = Column(Text)
     embedding_vector = Column(Vector(1536))
-
+    file = relationship("File", back_populates="file_chunks")
+    chunk_length = Column(Integer)
+    chunk_number = Column(Integer)
+    page_number = Column(Integer)
 
 class Item(BaseEntity):
     __tablename__ = "items"
