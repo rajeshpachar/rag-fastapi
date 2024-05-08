@@ -2,19 +2,13 @@ import io
 import os
 import shutil
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
-
-
 from app.auth.auth_handler import get_user
-# from app.dependencies import get_token_header
-
+from app.schemas import QuestionModel
 from app.tasks.background_tasks import TextProcessor
 from app.db import get_db, engine
 from app.libs.file_parser import FileParser
 from app.models import File
-import app.schemas as schemas
-from app.repositories import ItemRepo
 from sqlalchemy.orm import Session
-from fastapi.encoders import jsonable_encoder
 from typing import List,Optional, Union
 
 
@@ -37,7 +31,7 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile, db: S
     if file_extension not in allowed_extensions:
         raise HTTPException(status_code=400, detail="File type not allowed")
 
-    folder = "sources"
+    folder = "sces"
     try:
         # Ensure the directory exists
         os.makedirs(folder, exist_ok=True)
@@ -73,26 +67,3 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile, db: S
         print(f"Error saving file: {e}")
         raise HTTPException(status_code=500, detail="Error saving file")
 
-# import os
-# from typing import List
-
-# ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif']  # Add or modify as needed
-
-# def validate_file_extension(filename: str) -> bool:
-#     """
-#     Checks if the file extension is allowed.
-#     """
-#     _, ext = os.path.splitext(filename)
-#     return ext.lower() in ALLOWED_EXTENSIONS
-
-# def handle_file_upload(files: List[bytes]) -> None:
-#     """
-#     Handles file uploads and validates file extensions.
-#     """
-#     for file in files:
-#         filename = file.filename
-#         if validate_file_extension(filename):
-#             # Process the file (e.g., save to disk, upload to storage, etc.)
-#             print(f"Accepted file: {filename}")
-#         else:
-#             print(f"Rejected file: {filename} (invalid extension)")

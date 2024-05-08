@@ -12,7 +12,7 @@ genai.configure(api_key=GOOGLE_GEMINI_API_KEY)
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
 
-
+# vector size is 768
 def build_googleai_embeddings(docs):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     print(len(docs))
@@ -20,13 +20,14 @@ def build_googleai_embeddings(docs):
         vector = embeddings.embed_query(doc)
         yield idx, vector
 
+# vector size 3072
 def build_openai_embeddings(docs):
     embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
-    for doc in docs:
+    for idx, doc in enumerate(docs):
         vector = embeddings.embed_query(doc)
-        yield vector
+        yield idx, vector
 
-
+# vector size 384
 def build_MiniLM_embeddings(docs):
     # Define the path to the pre-trained model you want to use
     modelPath = "sentence-transformers/all-MiniLM-l6-v2"
@@ -43,7 +44,7 @@ def build_MiniLM_embeddings(docs):
         model_kwargs=model_kwargs, # Pass the model configuration options
         encode_kwargs=encode_kwargs # Pass the encoding options
     )
-    for doc in docs:
+    for idx, doc in enumerate(docs):
         vector = embeddings.embed_query(doc)
-        yield vector
+        yield idx, vector
 
