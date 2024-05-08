@@ -1,14 +1,39 @@
 import os
 import time
-from typing import Dict
-
-from fastapi import HTTPException
+from typing import Annotated, Dict
+from fastapi import Header, HTTPException
 import jwt
+from fastapi import Security, HTTPException, status
+from fastapi.security import APIKeyHeader
+
+from app.auth.api_key import check_api_key, get_user_from_api_key
+
 
 JWT_SECRET = os.getenv('JWT_SECRET')
 JWT_ALGORITHM = os.getenv('JWT_ALGORITHM')
 
 
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+async def get_user(X_API_Key: Annotated[str, Header()]):
+    if check_api_key(X_API_Key):
+        user = get_user_from_api_key(X_API_Key)
+        return user
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Missing or invalid API key"
+    )
+
+# def get_user1(api_key_header: str = Security(api_key_header)):
+#     if check_api_key(api_key_header):
+#         user = get_user_from_api_key(api_key_header)
+#         return user
+#     raise HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Missing or invalid API key"
+#     )
+
+###########################################
 def token_response(token: str):
     return {
         "access_token": token

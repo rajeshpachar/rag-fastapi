@@ -3,8 +3,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 import time
 
-class BaseEntityModel(BaseModel):
-    id: int
+# class BaseEntityModel(BaseModel):
+    # id: int
     # created_at: time
     # updated_at: time
     # created_by: str
@@ -15,7 +15,7 @@ class BaseEntityModel(BaseModel):
     # class Config:
     #     orm_mode = True
 
-class ItemBase(BaseEntityModel):
+class ItemBase(BaseModel):
     name: str
     price : float
     description: Optional[str] = None
@@ -33,7 +33,7 @@ class Item(ItemBase):
     #     orm_mode = True
 
 
-class StoreBase(BaseEntityModel):
+class StoreBase(BaseModel):
     name: str
 
 class StoreCreate(StoreBase):

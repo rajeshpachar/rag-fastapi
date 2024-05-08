@@ -1,6 +1,8 @@
 
 import os
 from dotenv import load_dotenv,find_dotenv
+
+from app.routers import stores
 # Find the .env file
 dotenv_path = find_dotenv()
 output = load_dotenv(dotenv_path, override=True)
@@ -47,6 +49,7 @@ models.Base.metadata.create_all(bind=engine)
 
 
 app.include_router(items.router)
+app.include_router(stores.router)
 # app.include_router(
 #     admin.router,
 #     prefix="/admin",

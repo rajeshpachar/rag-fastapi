@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth.auth_bearer import JWTBearer
 
-from app.dependencies import get_token_header
+from app.auth.auth_handler import get_user
+# from app.dependencies import get_token_header
 
 from app.db import get_db, engine
 import app.schemas as schemas
@@ -14,8 +15,8 @@ from typing import List,Optional, Union
 
 router = APIRouter(
     prefix="/items",
-    tags=["items"],
-    # dependencies=[Depends(get_token_header)],
+    tags=["Items"],
+    # dependencies=[Depends(get_user)],
     responses={404: {"description": "Not found"}},
 )
 
@@ -23,7 +24,7 @@ router = APIRouter(
 # fake_items_db = {"plumbus": {"name": "Plumbus"}, "gun": {"name": "Portal Gun"}}
 
 
-# @router.get("/", dependencies=[Depends(JWTBearer())])
+# @router.get("/")
 # async def read_items():
 #     return fake_items_db
 
@@ -47,9 +48,9 @@ router = APIRouter(
 #         )
 #     return {"item_id": item_id, "name": "The great Plumbus"}
 
-
-@router.post('/', tags=["Item"],response_model=schemas.Item,status_code=201, dependencies=[Depends(JWTBearer())])
-async def create_item(item_request: schemas.ItemCreate, db: Session = Depends(get_db)):
+# , dependencies=[Depends(JWTBearer())]
+@router.post('/', tags=["Items"],response_model=schemas.Item,status_code=201)
+async def create_item(item_request: schemas.ItemCreate, db: Session = Depends(get_db), user: dict = Depends(get_user)):
     """
     Create an Item and store it in the database
     """
@@ -60,8 +61,8 @@ async def create_item(item_request: schemas.ItemCreate, db: Session = Depends(ge
 
     return await ItemRepo.create(db=db, item=item_request)
 
-@router.get('/', tags=["Item"],response_model= Union[List[schemas.Item], None], dependencies=[Depends(JWTBearer())])
-def get_all_items(name: Optional[str] = None,db: Session = Depends(get_db)):
+@router.get('/', tags=["Items"],response_model= Union[List[schemas.Item], None])
+def get_all_items(name: Optional[str] = None, db: Session = Depends(get_db), user: dict = Depends(get_user)):
     """
     Get all the Items stored in database
     """
@@ -75,8 +76,8 @@ def get_all_items(name: Optional[str] = None,db: Session = Depends(get_db)):
         return ItemRepo.fetch_all(db)
 
 
-@router.get('/{item_id}', tags=["Item"],response_model=schemas.Item, dependencies=[Depends(JWTBearer())])
-def get_item(item_id: int,db: Session = Depends(get_db)):
+@router.get('/{item_id}', tags=["Items"],response_model=schemas.Item)
+def get_item(item_id: int, db: Session = Depends(get_db), user: dict = Depends(get_user)):
     """
     Get the Item with the given ID provided by User stored in database
     """
@@ -85,8 +86,8 @@ def get_item(item_id: int,db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Item not found with the given ID")
     return db_item
 
-@router.delete('/{item_id}', tags=["Item"])
-async def delete_item(item_id: int,db: Session = Depends(get_db)):
+@router.delete('/{item_id}', tags=["Items"])
+async def delete_item(item_id: int, db: Session = Depends(get_db), user: dict = Depends(get_user)):
     """
     Delete the Item with the given ID provided by User stored in database
     """
@@ -96,7 +97,7 @@ async def delete_item(item_id: int,db: Session = Depends(get_db)):
     await ItemRepo.delete(db,item_id)
     return "Item deleted successfully!"
 
-@router.put('/{item_id}', tags=["Item"],response_model=schemas.Item, dependencies=[Depends(JWTBearer())])
+@router.put('/{item_id}', tags=["Items"],response_model=schemas.Item)
 async def update_item(item_id: int,item_request: schemas.Item, db: Session = Depends(get_db)):
     """
     Update an Item stored in the database

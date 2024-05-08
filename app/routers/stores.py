@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth.auth_bearer import JWTBearer
 
-from app.dependencies import get_token_header
+from app.auth.auth_handler import get_user
+# from app.dependencies import get_token_header
 
 from app.db import get_db
 import app.schemas as schemas
@@ -14,14 +15,14 @@ from typing import List,Optional
 
 router = APIRouter(
     prefix="/stores",
-    tags=["items"],
-    dependencies=[Depends(get_token_header)],
+    tags=["Stores"],
+    # dependencies=[Depends(get_token_header)],
     responses={404: {"description": "Not found"}},
 )
 
 
-@router.post('/', tags=["Store"],response_model=schemas.Store,status_code=201, dependencies=[Depends(JWTBearer())])
-async def create_store(store_request: schemas.StoreCreate, db: Session = Depends(get_db)):
+@router.post('/', tags=["Stores"],response_model=schemas.Store,status_code=201)
+async def create_store(store_request: schemas.StoreCreate, db: Session = Depends(get_db), user: dict = Depends(get_user)):
     """
     Create a Store and save it in the database
     """
@@ -32,8 +33,8 @@ async def create_store(store_request: schemas.StoreCreate, db: Session = Depends
 
     return await StoreRepo.create(db=db, store=store_request)
 
-@router.get('/', tags=["Store"],response_model=List[schemas.Store], dependencies=[Depends(JWTBearer())])
-def get_all_stores(name: Optional[str] = None,db: Session = Depends(get_db)):
+@router.get('/', tags=["Stores"],response_model=List[schemas.Store])
+def get_all_stores(name: Optional[str] = None, db: Session = Depends(get_db), user: dict = Depends(get_user)):
     """
     Get all the Stores stored in database
     """
@@ -46,8 +47,8 @@ def get_all_stores(name: Optional[str] = None,db: Session = Depends(get_db)):
     else:
         return StoreRepo.fetch_all(db)
     
-@router.get('/{store_id}', tags=["Store"],response_model=schemas.Store, dependencies=[Depends(JWTBearer())])
-def get_store(store_id: int,db: Session = Depends(get_db)):
+@router.get('/{store_id}', tags=["Stores"],response_model=schemas.Store)
+def get_store(store_id: int, db: Session = Depends(get_db), user: dict = Depends(get_user)):
     """
     Get the Store with the given ID provided by User stored in database
     """
@@ -56,8 +57,8 @@ def get_store(store_id: int,db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Store not found with the given ID")
     return db_store
 
-@router.delete('/{store_id}', tags=["Store"], dependencies=[Depends(JWTBearer())])
-async def delete_store(store_id: int,db: Session = Depends(get_db)):
+@router.delete('/{store_id}', tags=["Stores"])
+async def delete_store(store_id: int, db: Session = Depends(get_db), user: dict = Depends(get_user)):
     """
     Delete the Item with the given ID provided by User stored in database
     """
