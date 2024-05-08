@@ -29,7 +29,10 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile, db: S
     # Define allowed file extensions
     allowed_extensions = ["txt", "pdf"]
 
-    # Check if the file extension is allowed
+    file_content = await file.read()  # Read file content as bytes
+    file_name = file.filename
+
+    # # Check if the file extension is allowed
     file_extension = file.filename.split('.')[-1]
     if file_extension not in allowed_extensions:
         raise HTTPException(status_code=400, detail="File type not allowed")
@@ -61,7 +64,7 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile, db: S
         db.refresh(new_file)
 
         # Add background job for processing file content
-        background_tasks.add_task(TextProcessor(db, new_file.id,).chunk_and_embed, file_text_content) # noqa
+        background_tasks.add_task(TextProcessor(db, new_file.id, 1024).chunk_and_embed, file_text_content) # noqa
 
         return {"info": "File saved", "filename": file.filename}
 
