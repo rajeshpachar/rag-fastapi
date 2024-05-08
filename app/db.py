@@ -2,7 +2,6 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.sql import text
 from sqlalchemy_utils import database_exists, create_database
-from pgvector.sqlalchemy import Vector
 from dotenv import load_dotenv
 import os
 import urllib.parse
@@ -14,7 +13,7 @@ POSTGRES_USERNAME = os.getenv('POSTGRES_USERNAME')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
 POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
-DATABASE_NAME = os.getenv('DATABASE_NAME', 'fastapi_rag_db')
+DATABASE_NAME = os.getenv('DATABASE_NAME', 'dbtest')
 encoded_password = urllib.parse.quote_plus(POSTGRES_PASSWORD)
 
 # Create the engine for the specific database
@@ -42,28 +41,15 @@ def get_db():
 Base = declarative_base()
 
 
-class File(Base):
-    __tablename__ = 'files'
-    file_id = Column(Integer, primary_key=True)
-    file_name = Column(String(255))
-    file_content = Column(Text)
 
 
-class FileChunk(Base):
-    __tablename__ = 'file_chunks'
-    chunk_id = Column(Integer, primary_key=True)
-    file_id = Column(Integer, ForeignKey('files.file_id'))
-    chunk_text = Column(Text)
-    embedding_vector = Column(Vector(1536))
+# with sessionmaker(bind=engine)() as session:
+#     session.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
+#     session.commit()
 
 
-with sessionmaker(bind=engine)() as session:
-    session.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
-    session.commit()
-
-
-try:
-    # Create tables
-    Base.metadata.create_all(engine)
-except Exception as e:
-    print(e)
+# try:
+#     # Create tables
+#     Base.metadata.create_all(engine)
+# except Exception as e:
+#     print(e)

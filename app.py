@@ -3,7 +3,7 @@ from fastapi import (FastAPI, UploadFile,
 import os
 import shutil
 import io
-from db import get_db, File, FileChunk
+from app.db import get_db, File, FileChunk
 from sqlalchemy.orm import Session
 from file_parser import FileParser
 from background_tasks import TextProcessor, client

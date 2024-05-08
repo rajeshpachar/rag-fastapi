@@ -29,14 +29,15 @@ class PdfParser(BaseParser):
                     except Exception as e:
                         logging.error(f"Failed to decrypt PDF: {e}")
                         return "Unable to decrypt PDF"
-
+                page_content_list = []
                 for page_num in range(len(reader.pages)):
                     page = reader.pages[page_num]
                     page_content = page.extract_text()
                     if not page_content:  # If text extraction fails, use OCR
                         page_content = self._ocr_page(filepath, page_num)
-                    content += page_content
-            return content
+                    page_content_list.append(page_content)
+                # content += page_content
+            return "".join(page_content_list)
         except Exception as e:
             logging.error(f"Error processing PDF: {e}")
             return "Error processing PDF file"
@@ -46,8 +47,14 @@ class PdfParser(BaseParser):
             document = fitz.open(filepath)
             page = document.load_page(page_num)
             pix = page.get_pixmap()
-            img = Image.open(io.BytesIO(pix.tobytes("png")))
-            ocr_text = pytesseract.image_to_string(img)
+            from io import BytesIO
+
+            with BytesIO(pix.tobytes("png")) as buffer:
+                img = Image.open(buffer)
+                ocr_text = pytesseract.image_to_string(img)
+                # ... do something with the image ...
+    
+            # img = Image.open(io.BytesIO(pix.tobytes("png")))
             document.close()
             return ocr_text
         except Exception as e:
