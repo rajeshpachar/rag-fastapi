@@ -1,9 +1,9 @@
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, TIMESTAMP, BigInteger
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Index, Integer, String, TIMESTAMP, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy import  Column, Integer, String, Text, ForeignKey
 from pgvector.sqlalchemy import Vector
 
-from .db import Base
+from app.db import Base
 
 class BaseEntity(Base):
     __abstract__ = True
@@ -22,6 +22,7 @@ class File(BaseEntity):
     bucket_key = Column(Text)
     file_length = Column(BigInteger)
     file_type = Column(String(16))
+    chunk_size = Column(Integer)
     file_chunks = relationship("FileChunk", back_populates="file")
 
 
@@ -29,12 +30,19 @@ class FileChunk(BaseEntity):
     __tablename__ = 'file_chunks'
     file_id = Column(Integer,  ForeignKey('files.id'))
     chunk_text = Column(Text)
-    embedding_vector = Column(Vector(1536))
-    file = relationship("File", back_populates="file_chunks")
-    chunk_length = Column(Integer)
-    chunk_number = Column(Integer)
-    page_number = Column(Integer)
+    # conn.execute('CREATE INDEX ON items USING hnsw (embedding vector_cosine_ops)')
 
+    # https://github.com/pgvector/pgvector-python/blob/master/examples/bulk_loading.py
+    vector = Column(Vector(768))
+    alt_vector = Column(Vector(384))
+    file = relationship("File", back_populates="file_chunks")
+    chunk_number = Column(Integer)
+
+
+
+###################################
+####### testing models
+###############
 class Item(BaseEntity):
     __tablename__ = "items"
     

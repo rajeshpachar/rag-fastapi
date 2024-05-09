@@ -6,6 +6,11 @@ print(sa.__version__)  # 1.3.20
 connection_uri = "mssql+pyodbc://@mssqlLocal64"
 engine = sa.create_engine(connection_uri, echo=False)
 
+# with sessionmaker(bind=engine)() as session:
+#     session.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
+#     session.commit()
+
+
 # show existing sample data
 with engine.connect() as conn:
     results = conn.execute(sa.text("SELECT * FROM users"))

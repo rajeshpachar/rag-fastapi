@@ -2,14 +2,17 @@ import io
 import os
 import shutil
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
+from sqlalchemy import select
 from app.auth.auth_handler import get_user
 from app.schemas import QuestionModel
 from app.tasks.background_tasks import TextProcessor
 from app.db import get_db, engine
 from app.libs.file_parser import FileParser
-from app.models import File
+from app.models import File, FileChunk
 from sqlalchemy.orm import Session
 from typing import List,Optional, Union
+from app.libs.constants import CHUNK_SIZE,CHUNK_OVERLAP
+from app.tasks.embed_gen import build_googleai_embeddings
 
 
 router = APIRouter(
@@ -51,14 +54,15 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile, db: S
         file_text_content = content_parser.parse()
         # save file details in the database
         new_file = File(file_name=file.filename,
-                        file_content=file_text_content,
+                        file_length=len(file_text_content),
+                        chunk_size = CHUNK_SIZE,
                         file_type=file_extension)
         db.add(new_file)
         db.commit()
         db.refresh(new_file)
 
         # Add background job for processing file content
-        background_tasks.add_task(TextProcessor(db, new_file.id, 1024).chunk_and_embed, file_text_content) # noqa
+        background_tasks.add_task(TextProcessor(db, new_file.id, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP).chunk_and_embed, file_text_content) # noqa
 
         return {"info": "File saved", "filename": file.filename}
 
@@ -67,3 +71,31 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile, db: S
         print(f"Error saving file: {e}")
         raise HTTPException(status_code=500, detail="Error saving file")
 
+
+@router.post("/find-similar-chunks/{file_id}")
+async def find_similar_chunks(file_id: int, question_data: QuestionModel,
+                              db: Session = Depends(get_db), user: dict = Depends(get_user)):
+    try:
+        question = question_data.question
+
+        vectors = [vector for idx, vector in build_googleai_embeddings(question)]
+        question_embedding = vectors[0]
+      
+        # Find similar chunks in the database
+        # session.scalars(select(Item).order_by(Item.embedding.l2_distance([3, 1, 2])).limit(5))
+#   Also supports max_inner_product and cosine_distance
+
+        similar_chunks_query = select(FileChunk).where(FileChunk.file_id == file_id)\
+            .order_by(FileChunk.embedding_vector.l2_distance(question_embedding)).limit(10) # noqa
+        similar_chunks = db.scalars(similar_chunks_query).all()
+
+        # Format the response
+        formatted_response = [
+            {"chunk_id": chunk.chunk_id, "chunk_text": chunk.chunk_text}
+            for chunk in similar_chunks
+        ]
+
+        return formatted_response
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

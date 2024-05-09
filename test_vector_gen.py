@@ -1,4 +1,12 @@
 
+import os
+from dotenv import load_dotenv,find_dotenv
+
+# Find the .env file
+dotenv_path = find_dotenv()
+output = load_dotenv(dotenv_path, override=True)
+
+
 from app.tasks.chunk_gen import get_char_text_chunks
 from app.tasks.embed_gen import build_MiniLM_embeddings, build_googleai_embeddings, build_openai_embeddings
 
@@ -44,21 +52,15 @@ GANs were invented by Jan Goodfellow and his colleagues at the University of Mon
 
 """
 
-import os
-from dotenv import load_dotenv,find_dotenv
-
-# Find the .env file
-dotenv_path = find_dotenv()
-output = load_dotenv(dotenv_path, override=True)
 
 
 print("#"*24)
 print("generate chunks")
-chunks = get_char_text_chunks(text, 128, 16)
+chunks = get_char_text_chunks(text, 256, 16)
 print("generate vectors")
 # Embed chunks
-# for idx, vector in build_googleai_embeddings(chunks):
+for idx, vector in build_googleai_embeddings(chunks):
 # for idx, vector in build_openai_embeddings(chunks):
-for idx, vector in build_MiniLM_embeddings(chunks):
+# for idx, vector in build_MiniLM_embeddings(chunks):
     print("idx: "+ str(idx))
     print("vector: "+ str(len(vector)))
