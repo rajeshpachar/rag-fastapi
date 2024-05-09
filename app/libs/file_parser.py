@@ -8,7 +8,6 @@ import logging
 import os
 from typing import Type, Dict
 
-
 # Base Parser Interface
 class BaseParser(ABC):
     @abstractmethod

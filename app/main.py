@@ -41,7 +41,6 @@ app = FastAPI()
 #     response.headers["X-Process-Time"] = str(process_time)
 #     return response
 
-
 # models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 

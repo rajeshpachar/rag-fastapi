@@ -7,9 +7,10 @@ from dotenv import load_dotenv
 
 from app.models import FileChunk
 from app.tasks.chunk_gen import get_char_text_chunks
+from app.libs.string_utils import sanitize_string
 from app.tasks.embed_gen import gai_embeddings, oai_embeddings
 # , hugging_embeddings
- 
+
 client = OpenAI()
 
 # nltk.download('punkt')
@@ -34,15 +35,20 @@ class TextProcessor:
         # Embed chunks
         # for idx, vector in build_googleai_embeddings(chunks):
         for idx, chunk in enumerate(chunks):
+            if not chunk or len(chunk) < 16:
+                continue
+
             vector = gai_embeddings.embed_query(chunk)
             # alt_vector = hugging_embeddings.embed_query(chunk)
             # Create embeddings
             chunk = chunks[idx]
+            print("saving chunk idx "+str(idx) + " of " + str(len(chunk)))
             # Store chunk and embedding in database
             file_chunk = FileChunk(file_id=self.file_id,
-                                   chunk_text=chunk,
+                                   chunk_text=sanitize_string(chunk),
                                    chunk_index=idx,
                                    vector=vector)
             self.db.add(file_chunk)
-
+        
         self.db.commit()
+        print("now commited")
