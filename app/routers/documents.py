@@ -12,7 +12,7 @@ from app.models import File, FileChunk
 from sqlalchemy.orm import Session
 from typing import List,Optional, Union
 from app.libs.constants import CHUNK_SIZE,CHUNK_OVERLAP
-from app.tasks.embed_gen import build_googleai_embeddings
+from app.tasks.embed_gen import gai_embeddings
 
 
 router = APIRouter(
@@ -74,21 +74,19 @@ async def find_similar_chunks(file_id: int, question_data: QuestionModel,
                               db: Session = Depends(get_db), user: dict = Depends(get_user)):
     try:
         question = question_data.question
-
-        vectors = [vector for idx, vector in build_googleai_embeddings(question)]
-        question_embedding = vectors[0]
+        question_embedding = gai_embeddings.embed_query(question)
       
         # Find similar chunks in the database
         # session.scalars(select(Item).order_by(Item.embedding.l2_distance([3, 1, 2])).limit(5))
 #   Also supports max_inner_product and cosine_distance
 
         similar_chunks_query = select(FileChunk).where(FileChunk.file_id == file_id)\
-            .order_by(FileChunk.embedding_vector.l2_distance(question_embedding)).limit(10) # noqa
+            .order_by(FileChunk.vector.l2_distance(question_embedding)).limit(10) # noqa
         similar_chunks = db.scalars(similar_chunks_query).all()
 
         # Format the response
         formatted_response = [
-            {"chunk_id": chunk.chunk_id, "chunk_text": chunk.chunk_text}
+            {"chunk_id": chunk.id, "chunk_text": chunk.chunk_text}
             for chunk in similar_chunks
         ]
 
