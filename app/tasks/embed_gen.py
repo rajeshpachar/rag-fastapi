@@ -14,7 +14,7 @@ from langchain_openai import OpenAIEmbeddings
 
 # models/text-embedding-004  models/embedding-001
 gai_embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
-# text-embedding-3-small text-embedding-3-large
+# text-embedding-3-small text-embedding-3-large text-embedding-ada-002
 # https://openai.com/api/pricing/
 oai_embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 

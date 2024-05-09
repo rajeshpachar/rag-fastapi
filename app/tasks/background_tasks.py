@@ -33,7 +33,7 @@ class TextProcessor:
         chunks = get_char_text_chunks(text, self.chunk_size, self.chunk_overlap)
         # Embed chunks
         # for idx, vector in build_googleai_embeddings(chunks):
-        for idx, chunk in chunks:
+        for idx, chunk in enumerate(chunks):
             vector = gai_embeddings.embed_query(chunk)
             # alt_vector = hugging_embeddings.embed_query(chunk)
             # Create embeddings
@@ -42,7 +42,6 @@ class TextProcessor:
             file_chunk = FileChunk(file_id=self.file_id,
                                    chunk_text=chunk,
                                    chunk_index=idx,
-                                   chunk_length=len(chunk),
                                    vector=vector)
             self.db.add(file_chunk)
 

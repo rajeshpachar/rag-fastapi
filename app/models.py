@@ -27,7 +27,7 @@ class File(BaseEntity):
     file_length = Column(BigInteger)
     file_type = Column(String(16))
     chunk_size = Column(Integer)
-    # file_chunks = relationship("FileChunk", back_populates=schema_name+".files")
+    # file_hash = Column(String(255), unique=True)
 
 
 class FileChunk(BaseEntity):
@@ -39,10 +39,37 @@ class FileChunk(BaseEntity):
     # conn.execute('CREATE INDEX ON items USING hnsw (embedding vector_cosine_ops)')
     # https://github.com/pgvector/pgvector-python/blob/master/examples/bulk_loading.py
     vector = Column(Vector(768))
-    # alt_vector = Column(Vector(384))
-    # file = relationship("File", back_populates= schema_name+".file_chunks")
-    chunk_number = Column(Integer)
+    chunk_index = Column(Integer)
 
+class Questions(BaseEntity):
+    __tablename__ = 'questions'
+    __table_args__ = {"schema": schema_name}
+    text = Column(Text)
+    disabled = Column(Boolean)
+    vector = Column(Vector(768))
+    model  = Column(String(32))
+
+class QuestionToDocuments(BaseEntity):
+    __tablename__ = 'question_to_documents'
+    __table_args__ = {"schema": schema_name}
+    chunk_id = Column(BigInteger,  ForeignKey(schema_name+'.file_chunks.id'))
+    ques_id = Column(BigInteger,  ForeignKey(schema_name+'.questions.id'))
+    score = Column(Integer)
+
+class QuestionAnswers(BaseEntity):
+    __tablename__ = 'question_answers'
+    __table_args__ = {"schema": schema_name}
+    text = Column(Text)
+    disabled = Column(Boolean)
+    model  = Column(String(32))
+    ques_id = Column(BigInteger,  ForeignKey(schema_name+'.questions.id'))
+
+class AnswerFeedback(BaseEntity):
+    __tablename__ = 'answer_feedback'
+    __table_args__ = {"schema": schema_name}
+    text = Column(Text)
+    like = Column(Boolean)
+    ans_id = Column(BigInteger,  ForeignKey(schema_name+'.questions.id'))
 
 
 ###################################
