@@ -1,7 +1,6 @@
 # https://medium.com/@akriti.upadhyay/implementing-rag-with-langchain-and-hugging-face-28e3ea66c5f7
 
 import os
-from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import google.generativeai as genai
 
@@ -25,36 +24,37 @@ def build_googleai_embeddings(docs):
         vector = gai_embeddings.embed_query(doc)
         yield idx, vector
 
-# vector size 3072
+# vector size 3072 , 1536
 def build_openai_embeddings(docs):
     for idx, doc in enumerate(docs):
         vector = oai_embeddings.embed_query(doc)
         yield idx, vector
 
+# from langchain.embeddings import HuggingFaceEmbeddings
 
-def  create_huggingface_embeddings_model() :
-     # Define the path to the pre-trained model you want to use
-    modelPath = "sentence-transformers/all-MiniLM-l6-v2"
+# def  create_huggingface_embeddings_model() :
+#      # Define the path to the pre-trained model you want to use
+#     modelPath = "sentence-transformers/all-MiniLM-l6-v2"
 
-    # Create a dictionary with model configuration options, specifying to use the CPU for computations
-    model_kwargs = {'device':'cpu'}
+#     # Create a dictionary with model configuration options, specifying to use the CPU for computations
+#     model_kwargs = {'device':'cpu'}
 
-    # Create a dictionary with encoding options, specifically setting 'normalize_embeddings' to False
-    encode_kwargs = {'normalize_embeddings': False}
+#     # Create a dictionary with encoding options, specifically setting 'normalize_embeddings' to False
+#     encode_kwargs = {'normalize_embeddings': False}
 
-    # Initialize an instance of HuggingFaceEmbeddings with the specified parameters
-    embeddings = HuggingFaceEmbeddings(
-        model_name=modelPath,     # Provide the pre-trained model's path
-        model_kwargs=model_kwargs, # Pass the model configuration options
-        encode_kwargs=encode_kwargs # Pass the encoding options
-    )
-    return embeddings
+#     # Initialize an instance of HuggingFaceEmbeddings with the specified parameters
+#     embeddings = HuggingFaceEmbeddings(
+#         model_name=modelPath,     # Provide the pre-trained model's path
+#         model_kwargs=model_kwargs, # Pass the model configuration options
+#         encode_kwargs=encode_kwargs # Pass the encoding options
+#     )
+#     return embeddings
 
-# hugging_embeddings = create_hug   gingface_embeddings_model()
+# hugging_embeddings = create_huggingface_embeddings_model()
 
 
-# vector size 384
-def build_MiniLM_embeddings(docs):
-    for idx, doc in enumerate(docs):
-        vector = hugging_embeddings.embed_query(doc)
-        yield idx, vector
+# # vector size 384
+# def build_MiniLM_embeddings(docs):
+#     for idx, doc in enumerate(docs):
+#         vector = hugging_embeddings.embed_query(doc)
+#         yield idx, vector

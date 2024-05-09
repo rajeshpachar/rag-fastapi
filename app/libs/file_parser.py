@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import PyPDF2
 import pytesseract
 from PIL import Image
-import fitz  # PyMuPDF
+# import fitz  # PyMuPDF
 import io
 import logging
 import os
@@ -31,10 +31,12 @@ class PdfParser(BaseParser):
                         return "Unable to decrypt PDF"
                 page_content_list = []
                 for page_num in range(len(reader.pages)):
+                    print("reading page num "+str(page_num))
                     page = reader.pages[page_num]
                     page_content = page.extract_text()
                     if not page_content:  # If text extraction fails, use OCR
-                        page_content = self._ocr_page(filepath, page_num)
+                        # page_content = self._ocr_page(filepath, page_num)
+                        continue
                     page_content_list.append(page_content)
                 # content += page_content
             return "".join(page_content_list)
@@ -42,24 +44,24 @@ class PdfParser(BaseParser):
             logging.error(f"Error processing PDF: {e}")
             return "Error processing PDF file"
 
-    def _ocr_page(self, filepath: str, page_num: int) -> str:
-        try:
-            document = fitz.open(filepath)
-            page = document.load_page(page_num)
-            pix = page.get_pixmap()
-            from io import BytesIO
+    # def _ocr_page(self, filepath: str, page_num: int) -> str:
+        # try:
+        #     document = fitz.open(filepath)
+        #     page = document.load_page(page_num)
+        #     pix = page.get_pixmap()
+        #     from io import BytesIO
 
-            with BytesIO(pix.tobytes("png")) as buffer:
-                img = Image.open(buffer)
-                ocr_text = pytesseract.image_to_string(img)
-                # ... do something with the image ...
+        #     with BytesIO(pix.tobytes("png")) as buffer:
+        #         img = Image.open(buffer)
+        #         ocr_text = pytesseract.image_to_string(img)
+        #         # ... do something with the image ...
     
-            # img = Image.open(io.BytesIO(pix.tobytes("png")))
-            document.close()
-            return ocr_text
-        except Exception as e:
-            logging.error(f"OCR processing error: {e}")
-            return "Error in OCR processing"
+        #     # img = Image.open(io.BytesIO(pix.tobytes("png")))
+        #     document.close()
+        #     return ocr_text
+        # except Exception as e:
+        #     logging.error(f"OCR processing error: {e}")
+        #     return "Error in OCR processing"
 
 
 # Concrete Parser for TXT

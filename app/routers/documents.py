@@ -25,15 +25,12 @@ router = APIRouter(
 async def upload_file(background_tasks: BackgroundTasks, file: UploadFile, db: Session = Depends(get_db), user: dict = Depends(get_user)): # noqa
     # Define allowed file extensions
     allowed_extensions = ["txt", "pdf"]
-
-    file_content = await file.read()  # Read file content as bytes
-    file_name = file.filename
-
     # # Check if the file extension is allowed
     file_extension = file.filename.split('.')[-1]
     if file_extension not in allowed_extensions:
         raise HTTPException(status_code=400, detail="File type not allowed")
 
+    # Define the folder to save the file
     folder = "sces"
     try:
         # Ensure the directory exists
@@ -42,7 +39,7 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile, db: S
         # Secure way to save the file
         file_location = os.path.join(folder, file.filename)
 
-        file_content = await file.read()  # Read file content as bytes
+        file_content = file.file.read()  # Read file content as bytes
 
         with open(file_location, "wb+") as file_object:
             # Convert bytes content to a file-like object

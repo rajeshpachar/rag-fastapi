@@ -6,14 +6,19 @@ from app.routers import stores
 # Find the .env file
 dotenv_path = find_dotenv()
 output = load_dotenv(dotenv_path, override=True)
- 
+
+print("####"*10)
+print(os.getenv('POSTGRES_USERNAME'))
+print("####"*10)
+# exit()
+
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
 
 import time
 from fastapi.middleware.gzip import GZipMiddleware
 
-from .routers import items
+from app.routers import items,documents
 from app.db import get_db, engine
 import app.models as models
 
@@ -38,7 +43,6 @@ app = FastAPI()
 
 
 # models.Base.metadata.drop_all(bind=engine)
-
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -47,7 +51,7 @@ models.Base.metadata.create_all(bind=engine)
 #     base_error_message = f"Failed to execute: {request.method}: {request.url}"
 #     return JSONResponse(status_code=400, content={"message": f"{base_error_message}. Detail: {err}"})
 
-
+app.include_router(documents.router)
 app.include_router(items.router)
 app.include_router(stores.router)
 # app.include_router(

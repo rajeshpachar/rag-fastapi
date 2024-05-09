@@ -1,17 +1,18 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sqlalchemy.orm import Session
-import nltk
-from nltk.tokenize import sent_tokenize
+# import nltk
+# from nltk.tokenize import sent_tokenize
 from openai import OpenAI
 from dotenv import load_dotenv
 
 from app.models import FileChunk
 from app.tasks.chunk_gen import get_char_text_chunks
-from app.tasks.embed_gen import gai_embeddings, oai_embeddings, hugging_embeddings
+from app.tasks.embed_gen import gai_embeddings, oai_embeddings
+# , hugging_embeddings
  
 client = OpenAI()
 
-nltk.download('punkt')
+# nltk.download('punkt')
 
 
 class TextProcessor:
@@ -34,7 +35,7 @@ class TextProcessor:
         # for idx, vector in build_googleai_embeddings(chunks):
         for idx, chunk in chunks:
             vector = gai_embeddings.embed_query(chunk)
-            alt_vector = hugging_embeddings.embed_query(chunk)
+            # alt_vector = hugging_embeddings.embed_query(chunk)
             # Create embeddings
             chunk = chunks[idx]
             # Store chunk and embedding in database
@@ -42,8 +43,7 @@ class TextProcessor:
                                    chunk_text=chunk,
                                    chunk_index=idx,
                                    chunk_length=len(chunk),
-                                   vector=vector,
-                                   alt_vector=alt_vector)
+                                   vector=vector)
             self.db.add(file_chunk)
 
         self.db.commit()

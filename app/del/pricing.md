@@ -9,6 +9,7 @@ https://ai.google.dev/gemini-api/docs/get-started/python#use_embeddings
 
 https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versioning#latest-version
 
+https://github.com/google/generative-ai-docs/blob/main/site/en/tutorials/quickstart_colab.ipynb
 
 # embed 
 

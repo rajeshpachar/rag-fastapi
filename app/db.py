@@ -2,11 +2,11 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.sql import text
 from sqlalchemy_utils import database_exists, create_database
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 import urllib.parse
 
-load_dotenv()
+# load_dotenv()
 
 # Database credentials
 POSTGRES_USERNAME = os.getenv('POSTGRES_USERNAME')
@@ -18,7 +18,7 @@ encoded_password = urllib.parse.quote_plus(POSTGRES_PASSWORD)
 
 # Create the engine for the specific database
 database_url = f"postgresql://{POSTGRES_USERNAME}:{encoded_password}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DATABASE_NAME}"  # noqa
-engine = create_engine(database_url)
+engine = create_engine(database_url, pool_size=10)
 
 # Check and create the database
 if not database_exists(engine.url):

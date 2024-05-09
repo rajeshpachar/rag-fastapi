@@ -59,8 +59,8 @@ print("generate chunks")
 chunks = get_char_text_chunks(text, 256, 16)
 print("generate vectors")
 # Embed chunks
-for idx, vector in build_googleai_embeddings(chunks):
-# for idx, vector in build_openai_embeddings(chunks):
+# for idx, vector in build_googleai_embeddings(chunks):
+for idx, vector in build_openai_embeddings(chunks):
 # for idx, vector in build_MiniLM_embeddings(chunks):
     print("idx: "+ str(idx))
     print("vector: "+ str(len(vector)))

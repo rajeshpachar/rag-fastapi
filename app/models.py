@@ -15,27 +15,32 @@ class BaseEntity(Base):
     account_id = Column(String(64))
     account_name = Column(String(64))
 
+schema_name = "rag"
+
 class File(BaseEntity):
     __tablename__ = 'files'
+    __table_args__ = {"schema": schema_name}
+
     file_name = Column(String(255))
     bucket_name = Column(String(255))
     bucket_key = Column(Text)
     file_length = Column(BigInteger)
     file_type = Column(String(16))
     chunk_size = Column(Integer)
-    file_chunks = relationship("FileChunk", back_populates="file")
+    # file_chunks = relationship("FileChunk", back_populates=schema_name+".files")
 
 
 class FileChunk(BaseEntity):
     __tablename__ = 'file_chunks'
-    file_id = Column(Integer,  ForeignKey('files.id'))
+    __table_args__ = {"schema": schema_name}
+    # 
+    file_id = Column(BigInteger,  ForeignKey(schema_name+'.files.id'))
     chunk_text = Column(Text)
     # conn.execute('CREATE INDEX ON items USING hnsw (embedding vector_cosine_ops)')
-
     # https://github.com/pgvector/pgvector-python/blob/master/examples/bulk_loading.py
     vector = Column(Vector(768))
-    alt_vector = Column(Vector(384))
-    file = relationship("File", back_populates="file_chunks")
+    # alt_vector = Column(Vector(384))
+    # file = relationship("File", back_populates= schema_name+".file_chunks")
     chunk_number = Column(Integer)
 
 
