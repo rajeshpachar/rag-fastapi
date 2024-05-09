@@ -2,7 +2,7 @@ import io
 import os
 import shutil
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from app.auth.auth_handler import get_user
 from app.schemas import QuestionModel
 from app.tasks.background_tasks import TextProcessor
@@ -80,13 +80,19 @@ async def find_similar_chunks(file_id: int, question_data: QuestionModel,
         # session.scalars(select(Item).order_by(Item.embedding.l2_distance([3, 1, 2])).limit(5))
 #   Also supports max_inner_product and cosine_distance
 
-        similar_chunks_query = select(FileChunk).where(FileChunk.file_id == file_id)\
-            .order_by(FileChunk.vector.l2_distance(question_embedding)).limit(10) # noqa
-        similar_chunks = db.scalars(similar_chunks_query).all()
+        print(select(FileChunk))
 
+        similar_chunks_query = select(FileChunk.id, FileChunk.chunk_index, FileChunk.chunk_text, FileChunk.vector.l2_distance(question_embedding).label("score")).where(FileChunk.file_id == file_id)\
+            .order_by(desc(FileChunk.vector.l2_distance(question_embedding))).limit(10) # noqa
+        print("#"*23)
+        print(similar_chunks_query)
+        print("#"*23)
+        similar_chunks = db.scalars(similar_chunks_query).all()
+        print(similar_chunks)
+        print("#"*23)
         # Format the response
         formatted_response = [
-            {"chunk_id": chunk.id, "chunk_text": chunk.chunk_text}
+            {"chunk_id": chunk.id, "chunk_text": chunk.chunk_text, "score": chunk.score}
             for chunk in similar_chunks
         ]
 
